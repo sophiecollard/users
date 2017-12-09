@@ -15,8 +15,15 @@ scalacOptions ++= Seq(
 resolvers +=
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
-libraryDependencies ++= Seq(
-  "com.softwaremill.quicklens" %% "quicklens" % "1.4.11",
-  "org.typelevel"              %% "cats-core" % "1.0.0-MF",
-  compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
-)
+libraryDependencies ++= {
+  val akkaV = "2.4.18"
+  val akkaHttpV = "10.0.11"
+
+  Seq(
+    "com.softwaremill.quicklens" %% "quicklens" % "1.4.11",
+    "com.typesafe.akka"          %% "akka-actor" % akkaV,
+    "com.typesafe.akka"          %% "akka-http" % akkaHttpV,
+    "org.typelevel"              %% "cats-core" % "1.0.0-MF",
+    compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
+  )
+}
