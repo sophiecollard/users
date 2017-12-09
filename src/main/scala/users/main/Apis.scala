@@ -2,6 +2,7 @@ package users.main
 
 import cats.data._
 
+import users.api.usermanagement._
 import users.config._
 
 object Apis {
@@ -13,4 +14,8 @@ object Apis {
 
 final case class Apis(
     services: Services
-)
+) {
+  val adminUserManagement = new AdminApi()
+
+  val routes = adminUserManagement.routes
+}
