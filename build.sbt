@@ -21,7 +21,9 @@ libraryDependencies ++= {
   val specs2V = "3.8.6"
 
   Seq(
+    "com.github.melrief"         %% "pureconfig" % "0.5.1",
     "com.softwaremill.quicklens" %% "quicklens" % "1.4.11",
+    "com.typesafe"               %  "config" % "1.3.1",
     "com.typesafe.akka"          %% "akka-actor" % akkaV,
     "com.typesafe.akka"          %% "akka-http" % akkaHttpV,
     "com.typesafe.akka"          %% "akka-http-testkit" % akkaHttpV,
