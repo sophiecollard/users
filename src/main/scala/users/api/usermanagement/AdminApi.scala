@@ -6,7 +6,9 @@ import akka.http.scaladsl.server.Route
 
 import users.domain.User
 
-class AdminApi {
+import scala.concurrent.ExecutionContext
+
+class AdminApi(implicit ec: ExecutionContext) {
 
   val userIdMatcher = Segment.map(User.Id(_))
 

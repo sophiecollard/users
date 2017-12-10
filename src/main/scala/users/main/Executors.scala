@@ -19,6 +19,9 @@ final case class Executors(
     config: ExecutorsConfig
 ) {
 
+  final val apisExecutor: ExecutionContext =
+    ExecutionContext.fromExecutor(new ForkJoinPool(config.apis.parallellism))
+
   final val serviceExecutor: ExecutionContext =
     ExecutionContext.fromExecutor(new ForkJoinPool(config.services.parallellism))
 

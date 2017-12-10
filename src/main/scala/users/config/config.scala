@@ -8,12 +8,17 @@ case class ApplicationConfig(
 )
 
 case class ExecutorsConfig(
+    apis: ExecutorsConfig.ApisConfig,
     services: ExecutorsConfig.ServicesConfig
 )
 
 object ExecutorsConfig {
   val fromApplicationConfig: Reader[ApplicationConfig, ExecutorsConfig] =
     Reader(_.executors)
+
+  case class ApisConfig(
+      parallellism: Int
+  )
 
   case class ServicesConfig(
       parallellism: Int
