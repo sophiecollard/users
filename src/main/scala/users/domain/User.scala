@@ -5,6 +5,10 @@ import java.time.OffsetDateTime
 import cats.kernel.Eq
 import cats.implicits._
 import com.softwaremill.quicklens._
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto._
+
+import users.utils.CirceHelper._
 
 final case class User(
     id: User.Id,
@@ -48,6 +52,10 @@ object User {
       at: OffsetDateTime
   ): User = User(id, userName, emailAddress, password, Metadata(1, at, at, None, None))
 
+  implicit val encoder: Encoder[User] = deriveEncoder
+
+  implicit val decoder: Decoder[User] = deriveDecoder
+
   final case class Id(value: String) extends AnyVal
 
   final case class Metadata(
@@ -57,6 +65,14 @@ object User {
       blockedAt: Option[OffsetDateTime],
       deletedAt: Option[OffsetDateTime]
   )
+
+  object Metadata {
+    implicit val encoder: Encoder[Metadata] =
+      deriveEncoder
+
+    implicit val decoder: Decoder[Metadata] =
+      deriveDecoder
+  }
 
   sealed trait Status
   object Status {
