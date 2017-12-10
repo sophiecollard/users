@@ -2,11 +2,20 @@ package users.api.usermanagement
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.Specs2RouteTest
+import com.typesafe.config.ConfigFactory
 import org.specs2.mutable.Specification
+import pureconfig.syntax._
+
+import users.config.ApplicationConfig
+import users.main.Apis
 
 class AdminApiSpec extends Specification with Specs2RouteTest {
 
-  val api = new AdminApi()
+  val config = ConfigFactory.load().to[ApplicationConfig].get // not safe!
+
+  val apis = Apis.fromApplicationConfig.run(config)
+
+  val api = apis.adminUserManagement
 
   "AdminApi" should {
 

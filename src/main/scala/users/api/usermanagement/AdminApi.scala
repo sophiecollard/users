@@ -5,10 +5,11 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 
 import users.domain.User
+import users.services._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-class AdminApi(implicit ec: ExecutionContext) {
+class AdminApi(service: UserManagement[Future[?]])(implicit ec: ExecutionContext) {
 
   val userIdMatcher = Segment.map(User.Id(_))
 
