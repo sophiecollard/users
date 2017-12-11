@@ -23,7 +23,7 @@ final case class Apis(
 
   implicit val ec = apisExecutor
 
-  val adminUserManagement = new AdminApi()
+  val adminUserManagement = new AdminApi(services.userManagement)
 
   val routes = adminUserManagement.routes
 }
