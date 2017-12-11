@@ -1,6 +1,7 @@
 package users.api.usermanagement
 
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
 import akka.http.scaladsl.testkit.Specs2RouteTest
 import com.typesafe.config.ConfigFactory
 import io.fcomb.akka.http.CirceSupport._
@@ -26,6 +27,8 @@ class PublicApiSpec extends Specification
 
   val api = apis.publicUserManagement
 
+  val authHeader = Authorization(OAuth2BearerToken(token = "some_random_user_id"))
+
   "PublicApi" should {
     "sign new user up" in {
       val input = SignUpInput(
@@ -39,21 +42,21 @@ class PublicApiSpec extends Specification
     }
 
     "get user's details" in {
-      Get(s"/users/me") ~> api.routes ~> check {
+      Get(s"/users/me").addHeader(authHeader) ~> api.routes ~> check {
         status === StatusCodes.NotImplemented
       }
     }
 
     "update user's email address" in {
       val newEmailAddress = EmailAddress("m.odersky@epfl.ch")
-      Put(s"/users/me/email", newEmailAddress) ~> api.routes ~> check {
+      Put(s"/users/me/email", newEmailAddress).addHeader(authHeader) ~> api.routes ~> check {
         status === StatusCodes.NotImplemented
       }
     }
 
     "update user's password" in {
       val newPassword = Password("k4k(YM&CzQGs[")
-      Put(s"/users/me/password", newPassword) ~> api.routes ~> check {
+      Put(s"/users/me/password", newPassword).addHeader(authHeader) ~> api.routes ~> check {
         status === StatusCodes.NotImplemented
       }
     }
