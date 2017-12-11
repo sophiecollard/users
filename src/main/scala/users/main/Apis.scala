@@ -1,5 +1,6 @@
 package users.main
 
+import akka.http.scaladsl.server.Directives._
 import cats.data._
 
 import users.api.usermanagement._
@@ -24,6 +25,11 @@ final case class Apis(
   implicit val ec = apisExecutor
 
   val adminUserManagement = new AdminApi(services.userManagement)
+  val publicUserManagement = new PublicApi(services.userManagement)
 
-  val routes = adminUserManagement.routes
+  val routes = pathPrefix("admin") {
+    adminUserManagement.routes
+  } ~ pathPrefix("public") {
+    publicUserManagement.routes
+  }
 }
