@@ -27,7 +27,8 @@ class PublicApiSpec extends Specification
 
   val api = apis.publicUserManagement
 
-  val authHeader = Authorization(OAuth2BearerToken(token = "some_random_user_id"))
+  var user: User = _
+  def authHeader = Authorization(OAuth2BearerToken(token = user.id.value))
 
   "PublicApi" should {
     "sign new user up" in {
@@ -37,27 +38,32 @@ class PublicApiSpec extends Specification
         password = Password("change_me_please")
       )
       Post("/users/sign-up", input) ~> api.routes ~> check {
-        status === StatusCodes.NotImplemented
+        status === StatusCodes.Created
+        user = responseAs[User]
+        ok
       }
     }
 
     "get user's details" in {
       Get(s"/users/me").addHeader(authHeader) ~> api.routes ~> check {
-        status === StatusCodes.NotImplemented
+        status === StatusCodes.OK
+        responseAs[User] === user
       }
     }
 
     "update user's email address" in {
       val newEmailAddress = EmailAddress("m.odersky@epfl.ch")
       Put(s"/users/me/email", newEmailAddress).addHeader(authHeader) ~> api.routes ~> check {
-        status === StatusCodes.NotImplemented
+        status === StatusCodes.OK
+        responseAs[User].emailAddress === newEmailAddress
       }
     }
 
     "update user's password" in {
       val newPassword = Password("k4k(YM&CzQGs[")
       Put(s"/users/me/password", newPassword).addHeader(authHeader) ~> api.routes ~> check {
-        status === StatusCodes.NotImplemented
+        status === StatusCodes.OK
+        responseAs[User].password must beSome(newPassword)
       }
     }
   }

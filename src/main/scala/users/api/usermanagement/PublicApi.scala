@@ -3,6 +3,7 @@ package users.api.usermanagement
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
+import cats.implicits._
 import io.fcomb.akka.http.CirceSupport._
 
 import users.api.domain.SignUpInput
@@ -21,24 +22,45 @@ class PublicApi(service: UserManagement[Future[?]])(implicit ec: ExecutionContex
       post {
         entity(as[SignUpInput]) { input =>
           complete(StatusCodes.NotImplemented)
+          val userF = service.signUp(
+            input.userName,
+            input.emailAddress,
+            input.password.pure[Option]
+          )
+          onSuccess(userF) {
+            case Left(error) => complete(error)
+            case Right(user) => complete(StatusCodes.Created, user)
+          }
         }
       }
     } ~ pathPrefix("me") {
       userIdFromAuthHeader { id =>
         pathEndOrSingleSlash {
           get {
-            complete(StatusCodes.NotImplemented)
+            val userF = service.get(id)
+            onSuccess(userF) {
+              case Left(error) => complete(error)
+              case Right(user) => complete(user)
+            }
           }
         } ~ path("email") {
           put {
             entity(as[EmailAddress]) { newEmailAddress =>
-              complete(StatusCodes.NotImplemented)
+              val userF = service.updateEmail(id, newEmailAddress)
+              onSuccess(userF) {
+                case Left(error) => complete(error)
+                case Right(user) => complete(user)
+              }
             }
           }
         } ~ path("password") {
           put {
             entity(as[Password]) { newPassword =>
-              complete(StatusCodes.NotImplemented)
+              val userF = service.updatePassword(id, newPassword)
+              onSuccess(userF) {
+                case Left(error) => complete(error)
+                case Right(user) => complete(user)
+              }
             }
           }
         }
