@@ -50,3 +50,20 @@ object HttpError {
   implicit def toResponseMarshallable(error: HttpError): ToResponseMarshallable =
     error.asHttpResponse
 }
+
+object AdminApiHttpError {
+  import users.services.usermanagement.Error
+
+  implicit class ImplicitMappings(val underlying: Error) {
+    def asHttpError: HttpError = mapFromUserManagementError(underlying)
+  }
+
+  def mapFromUserManagementError: PartialFunction[Error, HttpError] = {
+    case Error.Exists    => Conflict(reason = "already exists")
+    case Error.NotFound  => NotFound
+    case Error.Active    => Conflict(reason = "user is active")
+    case Error.Deleted   => Conflict(reason = "user is deleted")
+    case Error.Blocked   => Conflict(reason = "user is blocked")
+    case Error.System(_) => InternalServerError
+  }
+}
