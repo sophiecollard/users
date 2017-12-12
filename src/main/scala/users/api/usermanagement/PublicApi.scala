@@ -3,10 +3,12 @@ package users.api.usermanagement
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
+import cats.data.EitherT
 import cats.implicits._
 import io.fcomb.akka.http.CirceSupport._
 
-import users.api.domain.SignUpInput
+import users.api.domain.{HttpError, SignUpInput}
+import users.api.domain.AdminApiHttpError._
 import users.api.utils.AuthHelper
 import users.domain._
 import users.services.UserManagement
@@ -22,10 +24,10 @@ class PublicApi(service: UserManagement[Future[?]])(implicit ec: ExecutionContex
       post {
         entity(as[SignUpInput]) { input =>
           complete(StatusCodes.NotImplemented)
-          val userF = service.signUp(
+          val userF = signUp(
             input.userName,
             input.emailAddress,
-            input.password.pure[Option]
+            input.password
           )
           onSuccess(userF) {
             case Left(error) => complete(error)
@@ -37,7 +39,7 @@ class PublicApi(service: UserManagement[Future[?]])(implicit ec: ExecutionContex
       userIdFromAuthHeader { id =>
         pathEndOrSingleSlash {
           get {
-            val userF = service.get(id)
+            val userF = getUser(id)
             onSuccess(userF) {
               case Left(error) => complete(error)
               case Right(user) => complete(user)
@@ -46,7 +48,7 @@ class PublicApi(service: UserManagement[Future[?]])(implicit ec: ExecutionContex
         } ~ path("email") {
           put {
             entity(as[EmailAddress]) { newEmailAddress =>
-              val userF = service.updateEmail(id, newEmailAddress)
+              val userF = updateUserEmail(id, newEmailAddress)
               onSuccess(userF) {
                 case Left(error) => complete(error)
                 case Right(user) => complete(user)
@@ -56,7 +58,7 @@ class PublicApi(service: UserManagement[Future[?]])(implicit ec: ExecutionContex
         } ~ path("password") {
           put {
             entity(as[Password]) { newPassword =>
-              val userF = service.updatePassword(id, newPassword)
+              val userF = updateUserPassword(id, newPassword)
               onSuccess(userF) {
                 case Left(error) => complete(error)
                 case Right(user) => complete(user)
@@ -67,5 +69,25 @@ class PublicApi(service: UserManagement[Future[?]])(implicit ec: ExecutionContex
       }
     }
   }
+
+  def signUp(userName: UserName, emailAddress: EmailAddress, password: Password): Future[HttpError Either User] =
+    EitherT(service.signUp(userName, emailAddress, password.pure[Option]))
+      .leftMap(_.asHttpError)
+      .value
+
+  def getUser(id: User.Id): Future[HttpError Either User] =
+    EitherT(service.get(id))
+      .leftMap(_.asHttpError)
+      .value
+
+  def updateUserEmail(id: User.Id, newEmailAddress: EmailAddress): Future[HttpError Either User] =
+    EitherT(service.updateEmail(id, newEmailAddress))
+      .leftMap(_.asHttpError)
+      .value
+
+  def updateUserPassword(id: User.Id, newPassword: Password): Future[HttpError Either User] =
+    EitherT(service.updatePassword(id, newPassword))
+      .leftMap(_.asHttpError)
+      .value
 
 }
