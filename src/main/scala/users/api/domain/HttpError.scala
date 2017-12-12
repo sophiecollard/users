@@ -67,3 +67,18 @@ object AdminApiHttpError {
     case Error.System(_) => InternalServerError
   }
 }
+
+object PublicApiHttpError {
+  import users.services.usermanagement.Error
+
+  implicit class ImplicitMappings(val underlying: Error) {
+    def asHttpError: HttpError = mapFromUserManagementError(underlying)
+  }
+
+  def mapFromUserManagementError: PartialFunction[Error, HttpError] = {
+    case Error.Exists    => Conflict(reason = "username already taken")
+    case Error.NotFound  => NotFound
+    case Error.Deleted   => Conflict("can't update deleted account")
+    case _ => InternalServerError
+  }
+}
